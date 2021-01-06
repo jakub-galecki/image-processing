@@ -4,4 +4,4 @@ project(image_processing C)
 set(CMAKE_C_STANDARD 11)
 
 add_executable  (image_processing
-        main.c)
+        main.c bmp_img.c bmp_img.h)
