@@ -8,7 +8,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-typedef struct {
+typedef struct __attribute__((packed)) {
     uint16_t type;
     uint32_t size;
     uint16_t reserved1;
@@ -16,7 +16,7 @@ typedef struct {
     uint32_t offset;
 } BMP_Header;
 
-typedef struct {
+typedef struct __attribute__((packed)) {
     uint32_t dib_header_size;
     int32_t width_px;
     int32_t height_px;
@@ -31,16 +31,22 @@ typedef struct {
 } BMP_INFOHeader;
 
 typedef struct {
-    uint32_t red;
-    uint32_t green;
-    uint32_t blue;
+    uint8_t red;
+    uint8_t green;
+    uint8_t blue;
+} Pixel;
 
-} ColorTable;
+typedef struct {
+    BMP_Header header;
+    BMP_INFOHeader info_header;
+    Pixel **pixel_array;
+} BMP;
 
+BMP *read_bmp(FILE *file);
 
+void print_pixel_array_by_color(BMP *bmp_image, int option);
 
-
+void write_image(BMP *bmp_image, FILE *file);
 
 #define IMAGE_PROCESSING_BMP_IMG_H
-
 #endif //IMAGE_PROCESSING_BMP_IMG_H
