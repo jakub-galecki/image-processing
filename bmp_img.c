@@ -7,7 +7,9 @@
 #include <errno.h>
 #include <string.h>
 
-BMP *read_bmp(FILE *file) {
+BMP *read_image(const char *filename) {
+
+    FILE *file = fopen(filename, "rb");
     if (file == NULL) {
         fprintf(stderr, "Could not open the file: %s\n", strerror(errno));
     }
@@ -55,7 +57,8 @@ void print_pixel_array_by_color(BMP *bmp_image, int option) {
     }
 }
 
-void write_image(BMP *bmp_image, FILE *file){
+void write_image_by_filename(BMP *bmp_image, const char *filename){
+    FILE *file = fopen(filename, "wb");
     if (file == NULL) {
         fprintf(stderr, "Could not open the file: %s\n", strerror(errno));
     }
