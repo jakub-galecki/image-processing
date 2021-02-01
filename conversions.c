@@ -88,15 +88,10 @@ BMP rotateImage(BMP *bmp_img, double angle) {
     }
     return rotated;
 }
-//  TODO  - fix creates grayscale img - probably padding
 BMP rotateImageRight(BMP *bmp_img) {
     BMP rotated;
     rotated.info_header = bmp_img->info_header;
     rotated.header = bmp_img->header;
-
-    double radians = (M_PI / 180.0) * 90;
-    double cosine = cos(radians);
-    double sine = sin(radians);
 
     rotated.info_header.height_px = bmp_img->info_header.width_px;
     rotated.info_header.width_px = bmp_img->info_header.height_px;

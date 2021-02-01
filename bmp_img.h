@@ -46,7 +46,7 @@ BMP *read_image(const char *filename);
 
 void print_pixel_array_by_color(BMP *bmp_image, int option);
 
-void write_bmp_by_filename(BMP *bmp_image, const char *filename);
+void write_image_by_filename(BMP *bmp_image, const char *filename);
 
 #define IMAGE_PROCESSING_BMP_IMG_H
 #endif //IMAGE_PROCESSING_BMP_IMG_H
