@@ -11,5 +11,5 @@ Please note that rotating image by angle is not working as well as it should.
 There are some problems that should be solved but for lack of time they will be fixed in the future. 
 To fix / improve:
 - Rotate image by any angle
-- Eventul Memory leaks in `main.c`
+- Eventul Memory leaks
 - Format code (functions should return either BMP or \*BMP)
