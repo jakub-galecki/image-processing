@@ -9,7 +9,7 @@
 
 void grayscale(BMP **img);
 
-void changeBrightness(BMP **bmp_img, uint16_t brightness);
+void changeBrightness(BMP **bmp_img, int brightness);
 
 BMP rotateImage(BMP *bmp_img, double angle);
 BMP rotateImageRight(BMP *bmp_img);

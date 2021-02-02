@@ -7,8 +7,9 @@
 #include <errno.h>
 #include <string.h>
 
-BMP *read_image(const char *filename) {
+#define GET_PADDING(width) ((width) % 4)
 
+BMP *read_image(const char *filename) {
     FILE *file = fopen(filename, "rb");
     if (file == NULL) {
         fprintf(stderr, "Could not open the file: %s\n", strerror(errno));
@@ -24,13 +25,15 @@ BMP *read_image(const char *filename) {
     for (int i = 0; i < bmp_image->info_header.width_px; i++) {
         bmp_image->pixel_array[i] = (Pixel *) malloc(sizeof(Pixel) * bmp_image->info_header.height_px);
     }
-    if (bmp_image->pixel_array  == NULL) {
+    if (bmp_image->pixel_array == NULL) {
         fprintf(stderr, "Could not allocate memory: %s\n", strerror(errno));
     }
+    int padding = GET_PADDING(bmp_image->info_header.width_px);
     for (int y = bmp_image->info_header.height_px - 1; y >= 0; y--) {
         for (int x = 0; x < bmp_image->info_header.width_px; x++) {
             fread(&bmp_image->pixel_array[x][y], sizeof(Pixel), 1, file);
         }
+        fseek(file, padding, SEEK_CUR);
     }
     return bmp_image;
 }
@@ -57,17 +60,22 @@ void print_pixel_array_by_color(BMP *bmp_image, int option) {
     }
 }
 
-void write_image_by_filename(BMP *bmp_image, const char *filename){
+void write_image_by_filename(BMP *bmp_image, const char *filename) {
     FILE *file = fopen(filename, "wb");
     if (file == NULL) {
         fprintf(stderr, "Could not open the file: %s\n", strerror(errno));
     }
-    fwrite(&bmp_image->header, sizeof(bmp_image->header), 1,file);
-    fwrite(&bmp_image->info_header, sizeof(bmp_image->info_header), 1,file);
 
+    int padding = GET_PADDING(bmp_image->info_header.width_px);
+
+    fwrite(&bmp_image->header, sizeof(bmp_image->header), 1, file);
+    fwrite(&bmp_image->info_header, sizeof(bmp_image->info_header), 1, file);
     for (int y = bmp_image->info_header.height_px - 1; y >= 0; y--) {
         for (int x = 0; x < bmp_image->info_header.width_px; x++) {
             fwrite(&bmp_image->pixel_array[x][y], sizeof(Pixel), 1, file);
+        }
+        for (int i = 0; i < padding; i++) {
+            fputc(0x00, file);
         }
     }
 

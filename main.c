@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <regex.h>
 #include <gtk-3.0/gtk/gtk.h>
 #include "bmp_img.h"
 #include "conversions.h"
@@ -8,7 +7,10 @@ typedef struct {
     gpointer window;
     BMP *bmp;
     char *path;
+    gpointer input;
+    short opt;
 } Data;
+
 static void chooseFile(GtkWidget *button, gpointer data) {
     Data *d = data;
     GtkWidget *dialog = gtk_file_chooser_dialog_new("Open File",
@@ -37,13 +39,13 @@ static void combo_changed(GtkComboBox *widget, gpointer data) {
     if (gtk_combo_box_get_active(combo) != 0) {
         gchar *opt = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combo));
         if (strcmp(opt, "Grayscale") == 0) {
-            grayscale(&d->bmp);
+            d->opt = 0;
         } else if (strcmp(opt, "Rotate By Angle") == 0) {
-            g_print("%s", "kkk");
+            d->opt = 1;
         } else if (strcmp(opt, "Rotate Right") == 0) {
-            BMP rotated;
-            rotated = rotateImageRight(d->bmp);
-            *d->bmp = rotated;
+            d->opt = 2;
+        } else if (strcmp(opt, "Change brightness") == 0){
+            d->opt = 3;
         }
         g_free(opt);
     }
@@ -62,10 +64,47 @@ static void acceptDownload(GtkWidget *button, gpointer data) {
                                                     NULL);
     gint result = gtk_dialog_run(GTK_DIALOG(dialog));
     if (result == GTK_RESPONSE_ACCEPT) {
-        write_image_by_filename(d->bmp, "output.bmp");
-        g_print("%s", "File written to: ");
+        BMP rotated;
+        const gchar *text = gtk_entry_get_text(GTK_ENTRY(d->input));
+        int val;
+        bool inputProvided = false;
+        bool success = true;
+        if(strlen(text) > 0) {
+            inputProvided = true;
+            val = atoi(text);
+        }
+        switch (d->opt) {
+            case 0:
+                grayscale(&d->bmp);
+                break;
+            case 1:
+                if(inputProvided == true) {
+                    rotated = rotateImage(d->bmp, val);
+                    *d->bmp = rotated;
+                } else {
+                    g_print("%s", "Provide input value");
+                    success = false;
+                }
+                break;
+            case 2:
+                rotated = rotateImageRight(d->bmp);
+                *d->bmp = rotated;
+                break;
+            case 3:
+                if(inputProvided == true) {
+                    changeBrightness(&d->bmp, val);
+                } else {
+                    g_print("%s", "Provide input value");
+                    success = false;
+                }
+                break;
 
-        g_print("%s", d->path);
+        }
+        if(success == true){
+            write_image_by_filename(d->bmp, "output.bmp");
+            g_print("\n%s", "File written to: ");
+            g_print("%s", d->path);
+        }
     } else {
         gtk_main_quit();
     }
@@ -92,14 +131,19 @@ int main(int argc, char **argv) {
     gtk_box_pack_start(GTK_BOX(box1), selectFile, TRUE, TRUE, 0);
 
     GtkWidget *combo = gtk_combo_box_text_new();
-    const char *opts[] = {"Select option", "Grayscale", "Rotate By Angle", "Rotate Right"};
+    const char *opts[] = {"Select option", "Grayscale", "Rotate By Angle", "Rotate Right","Change brightness"};
     for (int i = 0; i < G_N_ELEMENTS(opts); i++) {
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), opts[i]);
     }
     gtk_combo_box_set_active(GTK_COMBO_BOX (combo), 0);
     g_signal_connect (combo, "changed", G_CALLBACK(combo_changed), &data);
     gtk_box_pack_start(GTK_BOX(box1), combo, TRUE, TRUE, 0);
-
+    GtkWidget *label = gtk_label_new("Input angle or brightness (may vary from -255 to 255)");
+    gtk_box_pack_start(GTK_BOX(box1), label, TRUE, TRUE, 0);
+    GtkWidget *input = gtk_entry_new();
+    data.input = input;
+    gtk_entry_set_max_length(GTK_ENTRY(input),4);
+    gtk_box_pack_start(GTK_BOX(box1), input, TRUE, TRUE, 0);
     GtkWidget *proceed = gtk_button_new_with_label("Proceed");
     g_signal_connect(G_OBJECT(proceed), "clicked", G_CALLBACK(acceptDownload), &data);
     gtk_box_pack_start(GTK_BOX(box1), proceed, TRUE, TRUE, 0);
