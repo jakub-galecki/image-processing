@@ -9,7 +9,7 @@ Image Processing in C Language
 ***
 Please note that rotating image by angle is not working as well as it should. 
 There are some problems that should be solved but for lack of time they will be fixed in the future. 
-To fix:
+To fix / improve:
 - Rotate image by any angle
-- Eventul Memory leaks
+- Eventul Memory leaks in `main.c`
 - Format code (functions should return either BMP or \*BMP)
